@@ -21,6 +21,8 @@ Os dados foram disponibilizados em um dicionário, onde cada par chave-valor cor
 
 Antes de selecionar os atributos iniciais a serem usados, deve-se primeiro realizar uma análise sobre a situação dos dados disponibilizados. O objetivo dessa análise é descobrir como os dados estão estruturados, se existem dados faltantes, problemas com os tipos de dados ou algum outro tipo de problema que inviabilize o uso de alguma feature inicialmente.
 
+## 3.1. Exploração dos dados 
+
 >Importando as bibliotecas necessárias para a análise
 
 
@@ -1361,6 +1363,8 @@ Descobrimos mais um problema. **TOTAL** não é um funcionário, e sim um regist
 df.drop('TOTAL', inplace=True)
 ```
 
+## 3.2. Escolhendos os atributos 
+
 >Como este é um caso de fraudes, então uma forma de selecionar os atributos é selecionando aqueles que possium mais outliers. Quais as variáveis que mais possuem outliers?
 
 Obs.: Método utilizado foi o IQR(interquartile range), que pode ser encontrado no [link](http://colingorrie.github.io/outlier-detection.html)
@@ -1414,6 +1418,203 @@ feature_list = ['poi', 'total_stock_value', 'from_messages', 'restricted_stock',
 
 Obs.: Nas próximas sessões iremos usar o algoritmo de seleção de features e comparar com nossa escolha inicial.
 
+## 3.3. Criando novos atributos 
+
+Todos os dados do dataset são valores brutos. As vezes, saber a porcentagem que o bonus ou salário em cima do total de pagamentos, é bem mais informativo. Seguindo o mesmo raciocínio, podemos falar do total de emails recebidos e enviado para POIs. Por isso criei as variáveis abaixo:
+
+1. perc_salary: percentual do salario em relação ao total pago.
+2. perc_bonus: percentual de bonus em relação ao total pago
+3. perc_messages_send_to_poi: percentual de mensagens enviadas para POIs, em relação ao total
+4. perc_messages_rec_from_poi: percentual de mensagens recebidas de POIs, em relação ao total
+
+
+```python
+df['perc_salary'] = df['salary']/df['total_payments']
+df['perc_bonus'] = df['bonus']/df['total_payments']
+df['perc_messages_send_to_poi'] = df['from_this_person_to_poi']/df['to_messages']
+df['perc_messages_rec_from_poi'] = df['from_poi_to_this_person']/df['from_messages']
+df.head()
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>salary</th>
+      <th>to_messages</th>
+      <th>deferral_payments</th>
+      <th>total_payments</th>
+      <th>loan_advances</th>
+      <th>bonus</th>
+      <th>email_address</th>
+      <th>restricted_stock_deferred</th>
+      <th>deferred_income</th>
+      <th>total_stock_value</th>
+      <th>...</th>
+      <th>from_this_person_to_poi</th>
+      <th>poi</th>
+      <th>long_term_incentive</th>
+      <th>shared_receipt_with_poi</th>
+      <th>restricted_stock</th>
+      <th>director_fees</th>
+      <th>perc_salary</th>
+      <th>perc_bonus</th>
+      <th>perc_messages_send_to_poi</th>
+      <th>perc_messages_rec_from_poi</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>ALLEN PHILLIP K</th>
+      <td>201955.0</td>
+      <td>2902.0</td>
+      <td>2869717.0</td>
+      <td>4484442.0</td>
+      <td>NaN</td>
+      <td>4175000.0</td>
+      <td>phillip.allen@enron.com</td>
+      <td>-126027.0</td>
+      <td>-3081055.0</td>
+      <td>1729541.0</td>
+      <td>...</td>
+      <td>65.0</td>
+      <td>False</td>
+      <td>304805.0</td>
+      <td>1407.0</td>
+      <td>126027.0</td>
+      <td>NaN</td>
+      <td>0.045035</td>
+      <td>0.930997</td>
+      <td>0.022398</td>
+      <td>0.021412</td>
+    </tr>
+    <tr>
+      <th>BADUM JAMES P</th>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>178980.0</td>
+      <td>182466.0</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>257817.0</td>
+      <td>...</td>
+      <td>NaN</td>
+      <td>False</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>BANNANTINE JAMES M</th>
+      <td>477.0</td>
+      <td>566.0</td>
+      <td>NaN</td>
+      <td>916197.0</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>james.bannantine@enron.com</td>
+      <td>-560222.0</td>
+      <td>-5104.0</td>
+      <td>5243487.0</td>
+      <td>...</td>
+      <td>0.0</td>
+      <td>False</td>
+      <td>NaN</td>
+      <td>465.0</td>
+      <td>1757552.0</td>
+      <td>NaN</td>
+      <td>0.000521</td>
+      <td>NaN</td>
+      <td>0.000000</td>
+      <td>1.344828</td>
+    </tr>
+    <tr>
+      <th>BAXTER JOHN C</th>
+      <td>267102.0</td>
+      <td>NaN</td>
+      <td>1295738.0</td>
+      <td>5634343.0</td>
+      <td>NaN</td>
+      <td>1200000.0</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>-1386055.0</td>
+      <td>10623258.0</td>
+      <td>...</td>
+      <td>NaN</td>
+      <td>False</td>
+      <td>1586055.0</td>
+      <td>NaN</td>
+      <td>3942714.0</td>
+      <td>NaN</td>
+      <td>0.047406</td>
+      <td>0.212980</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>BAY FRANKLIN R</th>
+      <td>239671.0</td>
+      <td>NaN</td>
+      <td>260455.0</td>
+      <td>827696.0</td>
+      <td>NaN</td>
+      <td>400000.0</td>
+      <td>frank.bay@enron.com</td>
+      <td>-82782.0</td>
+      <td>-201641.0</td>
+      <td>63014.0</td>
+      <td>...</td>
+      <td>NaN</td>
+      <td>False</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>145796.0</td>
+      <td>NaN</td>
+      <td>0.289564</td>
+      <td>0.483269</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+  </tbody>
+</table>
+<p>5 rows × 25 columns</p>
+</div>
+
+
+
+>Uma segunda lista de atributos sera criada com essas novas features para comparação dos resultados com as features sem os novos atributos
+
+
+```python
+feature_list_1 = ['poi', 'total_stock_value', 'from_messages', 'restricted_stock', 'from_this_person_to_poi', 'other', 'exercised_stock_options', 'from_poi_to_this_person', 'total_payments', 'bonus', 'salary', 'perc_salary','perc_bonus','perc_messages_send_to_poi','perc_messages_rec_from_poi']
+```
+
 # 4. Remoção de outliers
 
 >Na sessão anterior, acabamos removendos os outliers necessários **('TOTAL', 'THE TRAVEL AGENCY IN THE PARK', 'LOCKHART EUGENE E')**. Fora isso, como o caso é de fraude, o resto dos outliers não devem ser removidos
@@ -1437,15 +1638,21 @@ from sklearn.model_selection import train_test_split
 ```python
 df.fillna('NaN', inplace=True)
 my_dataset = df.to_dict('index')
-data = featureFormat(my_dataset, feature_list, sort_keys = True)
+#Sem novos atributos
+data = featureFormat(my_dataset, feature_list, sort_keys = False)
 labels, features = targetFeatureSplit(data)
+
+#Com novos atributos
+data_1 = featureFormat(my_dataset, feature_list_1, sort_keys = False)
+labels_1, features_1 = targetFeatureSplit(data_1)
 ```
 
 >Separando o conjunto de dados para treinamento e teste
 
 
 ```python
-features_train, features_test, labels_train, labels_test = train_test_split(features, labels, test_size=0.3, random_state=42)
+features_train, features_test, labels_train, labels_test = \
+    train_test_split(features, labels, test_size=0.3, random_state=42)
 ```
 
 ## 5.2. Classificadores
@@ -1470,6 +1677,22 @@ main()
     
 
 
+
+```python
+from sklearn.naive_bayes import GaussianNB
+clf = GaussianNB()
+dump_classifier_and_data(clf, my_dataset, feature_list_1)
+main()
+```
+
+    GaussianNB(priors=None)
+    	Accuracy: 0.84807	Precision: 0.38668	Recall: 0.23800	F1: 0.29465	F2: 0.25783
+    	Total predictions: 15000	True positives:  476	False positives:  755	False negatives: 1524	True negatives: 12245
+    
+
+
+Não houve diferença entre de resultados para as novas features
+
 ### 5.2.2. Random Forest
 
 >Importando a biblioteca. Criando o classificador e testando.
@@ -1489,10 +1712,32 @@ main()
                 min_weight_fraction_leaf=0.0, n_estimators=10, n_jobs=1,
                 oob_score=False, random_state=None, verbose=0,
                 warm_start=False)
-    	Accuracy: 0.85493	Precision: 0.37209	Recall: 0.12800	F1: 0.19048	F2: 0.14733
-    	Total predictions: 15000	True positives:  256	False positives:  432	False negatives: 1744	True negatives: 12568
+    	Accuracy: 0.85680	Precision: 0.38889	Recall: 0.12950	F1: 0.19430	F2: 0.14943
+    	Total predictions: 15000	True positives:  259	False positives:  407	False negatives: 1741	True negatives: 12593
     
 
+
+
+```python
+from sklearn.ensemble import RandomForestClassifier
+clf = RandomForestClassifier()
+dump_classifier_and_data(clf, my_dataset, feature_list_1)
+main()
+```
+
+    RandomForestClassifier(bootstrap=True, class_weight=None, criterion='gini',
+                max_depth=None, max_features='auto', max_leaf_nodes=None,
+                min_impurity_decrease=0.0, min_impurity_split=None,
+                min_samples_leaf=1, min_samples_split=2,
+                min_weight_fraction_leaf=0.0, n_estimators=10, n_jobs=1,
+                oob_score=False, random_state=None, verbose=0,
+                warm_start=False)
+    	Accuracy: 0.85913	Precision: 0.40989	Recall: 0.12850	F1: 0.19566	F2: 0.14895
+    	Total predictions: 15000	True positives:  257	False positives:  370	False negatives: 1743	True negatives: 12630
+    
+
+
+Houve uma pequena melhora com o uso das novas features. F1(sem): 0.19430 < F1(com): 0.19566
 
 ### 5.2.3. Decision Tree
 
@@ -1512,10 +1757,31 @@ main()
                 min_samples_leaf=1, min_samples_split=2,
                 min_weight_fraction_leaf=0.0, presort=False, random_state=None,
                 splitter='best')
-    	Accuracy: 0.79200	Precision: 0.22921	Recall: 0.23700	F1: 0.23304	F2: 0.23540
-    	Total predictions: 15000	True positives:  474	False positives: 1594	False negatives: 1526	True negatives: 11406
+    	Accuracy: 0.79267	Precision: 0.23032	Recall: 0.23700	F1: 0.23361	F2: 0.23563
+    	Total predictions: 15000	True positives:  474	False positives: 1584	False negatives: 1526	True negatives: 11416
     
 
+
+
+```python
+from sklearn import tree
+clf = tree.DecisionTreeClassifier()
+dump_classifier_and_data(clf, my_dataset, feature_list_1)
+main()
+```
+
+    DecisionTreeClassifier(class_weight=None, criterion='gini', max_depth=None,
+                max_features=None, max_leaf_nodes=None,
+                min_impurity_decrease=0.0, min_impurity_split=None,
+                min_samples_leaf=1, min_samples_split=2,
+                min_weight_fraction_leaf=0.0, presort=False, random_state=None,
+                splitter='best')
+    	Accuracy: 0.79100	Precision: 0.23690	Recall: 0.25550	F1: 0.24585	F2: 0.25155
+    	Total predictions: 15000	True positives:  511	False positives: 1646	False negatives: 1489	True negatives: 11354
+    
+
+
+Houve uma pequena melhora com o uso das novas features. F1(sem): 0.23361 < F1(com): 0.24585
 
 ### 5.2.4. K-means
 
@@ -1537,19 +1803,37 @@ main()
     
 
 
+
+```python
+from sklearn.cluster import KMeans
+clf = KMeans(n_clusters=2, random_state=0).fit(features_train)
+dump_classifier_and_data(clf, my_dataset, feature_list_1)
+main()
+```
+
+    KMeans(algorithm='auto', copy_x=True, init='k-means++', max_iter=300,
+        n_clusters=2, n_init=10, n_jobs=1, precompute_distances='auto',
+        random_state=0, tol=0.0001, verbose=0)
+    	Accuracy: 0.85533	Precision: 0.31360	Recall: 0.07150	F1: 0.11645	F2: 0.08456
+    	Total predictions: 15000	True positives:  143	False positives:  313	False negatives: 1857	True negatives: 12687
+    
+
+
+Não houve melhoras nesse caso.
+
 ### 5.2.5. Resultados 
 
 >**Naive Bayes:** Accuracy: 0.84807	Precision: 0.38668	Recall: 0.23800	F1: 0.29465	F2: 0.25783
 
->**Random Forest:** Accuracy: 0.85467	Precision: 0.36527	Recall: 0.12200	F1: 0.18291	F2: 0.14075
+>**Random Forest:** Accuracy: 0.86113	Precision: 0.43118	Recall: 0.13000	F1: 0.19977	F2: 0.15111
 
->**Decision Tree:** Accuracy: 0.79400	Precision: 0.23492	Recall: 0.24150	F1: 0.23817	F2: 0.24016
+>**Decision Tree:** Accuracy: 0.79193	Precision: 0.23747	Recall: 0.25350	F1: 0.24522	F2: 0.25012
 
 >**K-means: Accuracy:** Accuracy: 0.85533	Precision: 0.31360	Recall: 0.07150	F1: 0.11645	F2: 0.084568
 
-Dentre os classificadores testados, o melhor foi o **Naive Bayes**
+Dentre os classificadores testados, o melhor foi o **Naive Bayes**. E como houve melhores dos resultados com as novas features em alguns classificadores, resolvi mantê-los.
 
-## 5.3. Reseleção dos atributos e tunning dos classificadores  
+## 5.3. Reseleção dos atributos, tunning dos classificadores e Validação
 
 Agora vamos realizar os passos abaixo para cada classificador para ver o que conseguimos melhorar
 
@@ -1557,11 +1841,11 @@ Agora vamos realizar os passos abaixo para cada classificador para ver o que con
 
 >b) Redução de dimensionalidade dos dados, utilizando PCA;
 
->c) Seleção das Features mais importantes, utilizando SelectKBest;
+>c) Seleção das Features: o algoritmo SelectKBest( seleciona os k melhores atributos baseados em testes estatísticos univariados) em conjunto com o GridSearchCV, podemos otimizar a quantidade de atributos para cada classificador selecionado;
 
->d) Otimização, utilizando GridSearchCV; 
+>d) Otimização dos parâmetros do classificador: processo para selecionar os valores para os parâmetros de um modelo que maximizam a precisão do modelo, e para isso vamos usar o GridSearchCV; 
 
->e) Validação cruzada, utilizando StratifiedShuffleSplit.
+>e) Validação cruzada: Quando um modelo apresenta uma grande quantidade de parâmetros e quanto menos restrições colocarmos, maior a probabilidade de encontrarmos um super ajustamento(overfitting). Para evitar este problema existe o processo de validação. Há diversos tipos de validação, um dos mais utilizados na prática corresponde a dividir os seus dados em três bases, base de treino, validação e teste. No nosso caso vamos utilizar o **StratifiedShuffleSplit**. Na função, o classificador é ajustado ao conjunto de treinamento e, em seguida, os valores previstos são produzidos, pontuados e relatados para o conjunto de treinamento. Este método é empregado, pois preserva uma porcentagem de amostras para cada classe. Isso é importante, pois os POIs representam uma pequena parte do conjunto de dados;
 
 
 ```python
@@ -1595,14 +1879,18 @@ features_list = ['poi',
                  'to_messages',
                  'deferral_payments',
                  'from_messages',
-                 'restricted_stock_deferred'
+                 'restricted_stock_deferred',
+                 'perc_salary',
+                 'perc_bonus',
+                 'perc_messages_send_to_poi',
+                 'perc_messages_rec_from_poi'
                 ]
 ```
 
 
 ```python
 my_dataset = df.to_dict('index')
-data = featureFormat(my_dataset, feature_list, sort_keys = True)
+data = featureFormat(my_dataset, features_list, sort_keys = False)
 labels, features = targetFeatureSplit(data)
 ```
 
@@ -1629,39 +1917,8 @@ pipe = Pipeline([
 
 
 ```python
-dump_classifier_and_data(pipe, my_dataset, features_list)
-main()
-```
-
-    Pipeline(memory=None,
-         steps=[('scaler', StandardScaler(copy=True, with_mean=True, with_std=True)), ('reducer', PCA(copy=True, iterated_power='auto', n_components=None, random_state=42,
-      svd_solver='auto', tol=0.0, whiten=False)), ('selector', SelectKBest(k=10, score_func=<function f_classif at 0x1a1f514ea0>)), ('classifier', GaussianNB(priors=None))])
-    	Accuracy: 0.80987	Precision: 0.30351	Recall: 0.32900	F1: 0.31574	F2: 0.32356
-    	Total predictions: 15000	True positives:  658	False positives: 1510	False negatives: 1342	True negatives: 11490
-    
-
-
->**Naive Bayes(Antes):** Accuracy: 0.84807	Precision: 0.38668	Recall: 0.23800	F1: 0.29465	F2: 0.25783
-
->**Naive Bayes(Depois):** Accuracy: 0.80987	Precision: 0.30351	Recall: 0.32900	F1: 0.31574	F2: 0.32356
-
-### 5.3.2. Random Forest
-
-
-```python
-pipe = Pipeline([
-        ('scaler', preprocessing.StandardScaler()),
-        ('reducer', PCA(random_state=42)),
-        ('selector', SelectKBest()),
-        ('classifier', RandomForestClassifier())
-    ])
-```
-
-
-```python
 param_grid = { 
-    'classifier__n_estimators': [200, 700],
-    'classifier__max_features': ['auto', 'sqrt', 'log2']
+    'selector__k': [2,4,6,8,10,12,14,16,18,20,'all']
 }
 ```
 
@@ -1688,17 +1945,72 @@ main()
 
     Pipeline(memory=None,
          steps=[('scaler', StandardScaler(copy=True, with_mean=True, with_std=True)), ('reducer', PCA(copy=True, iterated_power='auto', n_components=None, random_state=42,
-      svd_solver='auto', tol=0.0, whiten=False)), ('selector', SelectKBest(k=10, score_func=<function f_classif at 0x1a1f514ea0>)), ('classif...n_jobs=1,
-                oob_score=False, random_state=None, verbose=0,
-                warm_start=False))])
-    	Accuracy: 0.85540	Precision: 0.40724	Recall: 0.18550	F1: 0.25490	F2: 0.20817
-    	Total predictions: 15000	True positives:  371	False positives:  540	False negatives: 1629	True negatives: 12460
+      svd_solver='auto', tol=0.0, whiten=False)), ('selector', SelectKBest(k=2, score_func=<function f_classif at 0x1a17841ea0>)), ('classifier', GaussianNB(priors=None))])
+    	Accuracy: 0.85760	Precision: 0.44276	Recall: 0.26300	F1: 0.32999	F2: 0.28624
+    	Total predictions: 15000	True positives:  526	False positives:  662	False negatives: 1474	True negatives: 12338
     
 
 
->**Random Forest(Antes):** Accuracy: 0.85467	Precision: 0.36527	Recall: 0.12200	F1: 0.18291	F2: 0.14075
+>**Naive Bayes(Antes):** Accuracy: 0.84807	Precision: 0.38668	Recall: 0.23800	F1: 0.29465	F2: 0.25783
 
->**Random Forest(Depois):** Accuracy: 0.85693	Precision: 0.41925	Recall: 0.18950	F1: 0.26102	F2: 0.21283
+>**Naive Bayes(Depois):** Accuracy: 0.85760	Precision: 0.44276	Recall: 0.26300	F1: 0.32999	F2: 0.28624
+
+### 5.3.2. Random Forest
+
+
+```python
+pipe = Pipeline([
+        ('scaler', preprocessing.StandardScaler()),
+        ('reducer', PCA(random_state=42)),
+        ('selector', SelectKBest()),
+        ('classifier', RandomForestClassifier())
+    ])
+```
+
+
+```python
+param_grid = { 
+    'classifier__n_estimators': [10,20,40,80,160],
+    'classifier__max_features': ['auto', 'sqrt', 'log2', None],
+    'classifier__criterion': ['gini', 'entropy'],
+    'selector__k': [2,4,6,8,10,12,14,16,18,20,'all']
+}
+```
+
+
+```python
+sss = StratifiedShuffleSplit(n_splits=10, test_size=0.2, random_state=42)
+```
+
+
+```python
+grid_search = GridSearchCV(pipe, param_grid, scoring='f1', cv=sss)
+```
+
+
+```python
+grid = grid_search.fit(features_train,labels_train)
+```
+
+
+```python
+dump_classifier_and_data(grid_search.best_estimator_, my_dataset, features_list)
+main()
+```
+
+    Pipeline(memory=None,
+         steps=[('scaler', StandardScaler(copy=True, with_mean=True, with_std=True)), ('reducer', PCA(copy=True, iterated_power='auto', n_components=None, random_state=42,
+      svd_solver='auto', tol=0.0, whiten=False)), ('selector', SelectKBest(k=2, score_func=<function f_classif at 0x1a17841ea0>)), ('classifi...n_jobs=1,
+                oob_score=False, random_state=None, verbose=0,
+                warm_start=False))])
+    	Accuracy: 0.84080	Precision: 0.36621	Recall: 0.26550	F1: 0.30783	F2: 0.28095
+    	Total predictions: 15000	True positives:  531	False positives:  919	False negatives: 1469	True negatives: 12081
+    
+
+
+>**Random Forest(Antes):** Accuracy: 0.85913	Precision: 0.40989	Recall: 0.12850	F1: 0.19566	F2: 0.14895
+
+>**Random Forest(Depois):** Accuracy: 0.84080	Precision: 0.36621	Recall: 0.26550	F1: 0.30783	F2: 0.28095
 
 ### 5.3.3. Decision Tree
 
@@ -1717,10 +2029,9 @@ pipe = Pipeline([
 param_grid = {
     'classifier__criterion': ['gini','entropy'],
     'classifier__splitter': ['best', 'random'],
-    'classifier__min_samples_split': [2,4,8,16],
+    'classifier__min_samples_split': [2,4,8,16,32],
     'classifier__class_weight': ['balanced', None],
-    'classifier__min_samples_leaf': [1,2,4,8,16],
-    'classifier__max_depth': [None,1,2,4,8,16],
+    'selector__k': [2,4,6,8,10,12,14,16,18,20,'all']
 }
 ```
 
@@ -1747,16 +2058,16 @@ main()
 
     Pipeline(memory=None,
          steps=[('scaler', StandardScaler(copy=True, with_mean=True, with_std=True)), ('reducer', PCA(copy=True, iterated_power='auto', n_components=None, random_state=42,
-      svd_solver='auto', tol=0.0, whiten=False)), ('selector', SelectKBest(k=10, score_func=<function f_classif at 0x1a1f514ea0>)), ('classif...      min_weight_fraction_leaf=0.0, presort=False, random_state=None,
-                splitter='best'))])
-    	Accuracy: 0.68027	Precision: 0.28670	Recall: 0.93950	F1: 0.43933	F2: 0.64553
-    	Total predictions: 15000	True positives: 1879	False positives: 4675	False negatives:  121	True negatives: 8325
+      svd_solver='auto', tol=0.0, whiten=False)), ('selector', SelectKBest(k=2, score_func=<function f_classif at 0x1a17841ea0>)), ('classifi...    min_weight_fraction_leaf=0.0, presort=False, random_state=None,
+                splitter='random'))])
+    	Accuracy: 0.81673	Precision: 0.30726	Recall: 0.29850	F1: 0.30282	F2: 0.30021
+    	Total predictions: 15000	True positives:  597	False positives: 1346	False negatives: 1403	True negatives: 11654
     
 
 
->**Decision Tree(Antes):** Accuracy: 0.79400	Precision: 0.23492	Recall: 0.24150	F1: 0.23817	F2: 0.24016
+>**Decision Tree(Antes):** Accuracy: 0.79100	Precision: 0.23690	Recall: 0.25550	F1: 0.24585	F2: 0.25155
 
->**Decision Tree(Depois):** Accuracy: 0.68027	Precision: 0.28670	Recall: 0.93950	F1: 0.43933	F2: 0.64553
+>**Decision Tree(Depois):** Accuracy: 0.81673	Precision: 0.30726	Recall: 0.29850	F1: 0.30282	F2: 0.30021
 
 ### 5.3.4. K-means
 
@@ -1777,7 +2088,8 @@ param_grid = {
     'classifier__random_state': [42],
     'classifier__precompute_distances': ['auto', True, False],
     'classifier__max_iter': [10,50,100,200,400,500],
-    'classifier__n_clusters': [2]
+    'classifier__n_clusters': [2],
+    'selector__k': [2,4,6,8,10,12,14,16,18,20,'all']
 }
 ```
 
@@ -1804,27 +2116,27 @@ main()
 
     Pipeline(memory=None,
          steps=[('scaler', StandardScaler(copy=True, with_mean=True, with_std=True)), ('reducer', PCA(copy=True, iterated_power='auto', n_components=None, random_state=42,
-      svd_solver='auto', tol=0.0, whiten=False)), ('selector', SelectKBest(k=10, score_func=<function f_classif at 0x1a1f514ea0>)), ('classifier', KMeans(algorithm='auto', copy_x=True, init='k-means++', max_iter=10,
+      svd_solver='auto', tol=0.0, whiten=False)), ('selector', SelectKBest(k='all', score_func=<function f_classif at 0x1a17841ea0>)), ('classifier', KMeans(algorithm='auto', copy_x=True, init='k-means++', max_iter=10,
         n_clusters=2, n_init=10, n_jobs=1, precompute_distances='auto',
         random_state=42, tol=0.0001, verbose=0))])
-    	Accuracy: 0.72060	Precision: 0.14558	Recall: 0.22500	F1: 0.17678	F2: 0.20287
-    	Total predictions: 15000	True positives:  450	False positives: 2641	False negatives: 1550	True negatives: 10359
+    	Accuracy: 0.72767	Precision: 0.14064	Recall: 0.20400	F1: 0.16650	F2: 0.18714
+    	Total predictions: 15000	True positives:  408	False positives: 2493	False negatives: 1592	True negatives: 10507
     
 
 
->**K-means: Accuracy(Antes):** Accuracy: 0.85533	Precision: 0.31360	Recall: 0.07150	F1: 0.11645	F2: 0.084568
+>**K-means: Accuracy(Antes):** Accuracy: 0.85533	Precision: 0.31360	Recall: 0.07150	F1: 0.11645	F2: 0.08456
 
->**K-means: Accuracy(Depois):** Accuracy: 0.72060	Precision: 0.14558	Recall: 0.22500	F1: 0.17678	F2: 0.20287
+>**K-means: Accuracy(Depois):** Accuracy: 0.72767	Precision: 0.14064	Recall: 0.20400	F1: 0.16650	F2: 0.18714
 
 ### 5.3.5. Resultados Após Otimizações
 
->**Naive Bayes(Depois):** Accuracy: 0.80987	Precision: 0.30351	Recall: 0.32900	F1: 0.31574	F2: 0.32356
+>**Naive Bayes(Depois):** Accuracy: 0.85760 Precision: 0.44276 Recall: 0.26300 F1: 0.32999 F2: 0.28624
 
->**Random Forest(Depois):** Accuracy: 0.85693	Precision: 0.41925	Recall: 0.18950	F1: 0.26102	F2: 0.21283
+>**Random Forest(Depois):** Accuracy: 0.84080 Precision: 0.36621 Recall: 0.26550 F1: 0.30783 F2: 0.28095
 
->**Decision Tree(Depois):** Accuracy: 0.68027	Precision: 0.28670	Recall: 0.93950	F1: 0.43933	F2: 0.64553
+>**Decision Tree(Depois):** Accuracy: 0.81673 Precision: 0.30726 Recall: 0.29850 F1: 0.30282 F2: 0.30021
 
->**K-means: Accuracy(Depois):** Accuracy: 0.72060	Precision: 0.14558	Recall: 0.22500	F1: 0.17678	F2: 0.20287
+>**K-means: Accuracy(Depois):** Accuracy: 0.72767	Precision: 0.14064	Recall: 0.20400	F1: 0.16650	F2: 0.18714
 
 # 6. Conclusões
 
@@ -1834,5 +2146,5 @@ O classificador que teve o melhor desempenho nos teste foi o **Decision Tree**, 
 
 Os resultados do classificador são interpretados dessa forma:
 
-- Recall 93.9%: Quando uma pessoa que é POI é submetida ao classificador, 93.9% das vezes será classificado como POI. em outras palavras, 6.1% de Falsos Negativos (Erro tipo II).
-- Precision 28.6%: De todas as pessoas que são classificadas como POI, somente 28.6% são verdadeiros. Em outras palavras, temos 71.4% de Falsos positivos (Erro tipo I)
+- Recall ~30%: Quando uma pessoa que é POI é submetida ao classificador, 30% das vezes será classificado como POI. em outras palavras, 70% de Falsos Negativos (Erro tipo II).
+- Precision ~30%: De todas as pessoas que são classificadas como POI, somente 30% são verdadeiros. Em outras palavras, temos 70% de Falsos positivos (Erro tipo I)

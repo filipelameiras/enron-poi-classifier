@@ -10,7 +10,10 @@ from sklearn.feature_selection import SelectKBest
 import warnings
 from sklearn import tree
 from feature_format import featureFormat, targetFeatureSplit
-from tester import dump_classifier_and_data
+from tester import dump_classifier_and_data, main
+import pandas as pd
+import numpy as np
+from sklearn.svm import SVC
 
 warnings.filterwarnings('ignore')
 
@@ -38,7 +41,11 @@ features_list = ['poi',
                  'to_messages',
                  'deferral_payments',
                  'from_messages',
-                 'restricted_stock_deferred'
+                 'restricted_stock_deferred',
+                 'perc_salary',
+                 'perc_bonus',
+                 'perc_messages_send_to_poi',
+                 'perc_messages_rec_from_poi'
                 ] # You will need to use more features
 
 ### Load the dictionary containing the dataset
@@ -48,10 +55,23 @@ with open("final_project_dataset.pkl", "rb") as data_file:
 ### Task 2: Remove outliers
 ### Task 3: Create new feature(s)
 ### Store to my_dataset for easy export below.
-my_dataset = data_dict
+
+df = pd.DataFrame.from_dict(data_dict, orient='index')
+df = df.replace('NaN', np.NaN)
+df.drop('LOCKHART EUGENE E', inplace=True)
+df.drop('THE TRAVEL AGENCY IN THE PARK', inplace=True)
+df.drop('TOTAL', inplace=True)
+
+df['perc_salary'] = df['salary']/df['total_payments']
+df['perc_bonus'] = df['bonus']/df['total_payments']
+df['perc_messages_send_to_poi'] = df['from_this_person_to_poi']/df['to_messages']
+df['perc_messages_rec_from_poi'] = df['from_poi_to_this_person']/df['from_messages']
+df.fillna('NaN', inplace=True)
+
+my_dataset = df.to_dict('index')
 
 ### Extract features and labels from dataset for local testing
-data = featureFormat(my_dataset, features_list, sort_keys = True)
+data = featureFormat(my_dataset, features_list, sort_keys = False)
 labels, features = targetFeatureSplit(data)
 
 ### Task 4: Try a varity of classifiers
@@ -84,17 +104,15 @@ pipe = Pipeline([
 param_grid = {
     'classifier__criterion': ['gini','entropy'],
     'classifier__splitter': ['best', 'random'],
-    'classifier__min_samples_split': [2,4,8,16],
+    'classifier__min_samples_split': [2,4,8,16,32],
     'classifier__class_weight': ['balanced', None],
-    'classifier__min_samples_leaf': [1,2,4,8,16],
-    'classifier__max_depth': [None,1,2,4,8,16],
+    'selector__k': [2,4,6,8,10,12,14,16,18,20,'all']
 }
+
 
 sss = StratifiedShuffleSplit(n_splits=10, test_size=0.2, random_state=42)
 grid_search = GridSearchCV(pipe, param_grid, scoring='f1', cv=sss)
 grid = grid_search.fit(features_train,labels_train)
-
-print(grid_search.best_estimator_)
 
 ### Task 6: Dump your classifier, dataset, and features_list so anyone can
 ### check your results. You do not need to change anything below, but make sure
@@ -102,3 +120,4 @@ print(grid_search.best_estimator_)
 ### generates the necessary .pkl files for validating your results.
 
 dump_classifier_and_data(grid_search.best_estimator_, my_dataset, features_list)
+main()
